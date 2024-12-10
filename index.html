@@ -7,17 +7,51 @@
 body{margin:0;overflow:hidden;font-family:sans-serif;}
 #ui {
   position:absolute;
-  top:0;
-  left:0;
-  background:rgba(255,255,255,0.8);
-  padding:10px;
-  max-width:300px;
-  font-size:14px;
+  top:20px;
+  left:20px;
+  background:rgba(255,255,255,0.95);
   box-shadow:0 0 10px rgba(0,0,0,0.3);
-  z-index:10;
+  font-size:14px;
+  display:flex;
+  flex-direction:column;
+  width:300px;
+  resize:both;
+  overflow:auto;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+#uiHeader {
+  cursor:move;
+  background:#333;
+  color:#fff;
+  padding:8px;
+  border-top-left-radius:6px;
+  border-top-right-radius:6px;
+  font-weight:bold;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  user-select:none;
+}
+#uiControls {
+  padding:10px;
+  background:#f9f9f9;
+  flex:1;
+  display:flex;
+  flex-direction:column;
 }
 #ui button {
   margin-top:5px;
+  padding:5px;
+  background:#2196f3;
+  border:none;
+  color:#fff;
+  cursor:pointer;
+  border-radius:3px;
+  font-size:13px;
+}
+#ui button:hover {
+  background:#1976d2;
 }
 #console {
   font-family:monospace;
@@ -30,14 +64,37 @@ body{margin:0;overflow:hidden;font-family:sans-serif;}
   border:1px solid #ccc;
   border-radius:4px;
 }
+#toggleUI {
+  position:absolute;
+  top:20px;
+  left:20px;
+  background:#2196f3;
+  border:none;
+  color:#fff;
+  padding:5px;
+  cursor:pointer;
+  border-radius:3px;
+  font-size:13px;
+  z-index:11;
+}
+#toggleUI:hover {
+  background:#1976d2;
+}
 </style>
 </head>
 <body>
+<button id="toggleUI">Toggle UI</button>
 <div id="ui">
-  <div>Enter JS commands to interact with the pyraminx:</div>
-  <textarea id="codeInput" rows="10" style="width:100%;"></textarea>
-  <button id="runBtn">Run Code</button>
-  <div id="console"></div>
+  <div id="uiHeader">
+    <span>Pyraminx Control</span>
+    <span style="cursor:pointer;" id="closeBtn">✖</span>
+  </div>
+  <div id="uiControls">
+    <div style="margin-bottom:5px;">Enter JS commands:</div>
+    <textarea id="codeInput" rows="10" style="width:100%;"></textarea>
+    <button id="runBtn">Run Code</button>
+    <div id="console"></div>
+  </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.124.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.124.0/examples/js/controls/OrbitControls.js"></script>
@@ -136,7 +193,6 @@ function createFaceGeometry(faceIndex){
   var faceColor=stickerTextures[colorKeys[faceIndex]];
   var faceGroup=new THREE.Group();
 
-  // Top smaller triangles
   var topTris=[ [c[0],layerCoords[0],layerCoords[5]],
                 [c[1],layerCoords[2],layerCoords[1]],
                 [c[2],layerCoords[4],layerCoords[3]] ];
@@ -148,7 +204,6 @@ function createFaceGeometry(faceIndex){
     pieces.push(tri);
   }
 
-  // Inner triangles
   for(var i=0;i<layerCoords.length;i++){
     var t=[center,layerCoords[i],layerCoords[(i+1)%layerCoords.length]];
     var tri=createStickerTriangle(t[0],t[1],t[2],faceColor);
@@ -331,7 +386,6 @@ function processQueue(){
   }
 }
 
-// Public API
 window.rotateLayerCommand=function(faceIndex,dir){
   queueRotateLayer(faceIndex,dir);
 };
@@ -340,18 +394,37 @@ window.getCurrentState=function(){
   queueGetState();
 };
 
-// Scramble at the start
 function scramble(){
   for(var i=0;i<8;i++){
     queueRotateLayer(Math.floor(Math.random()*4),(Math.random()<0.5)?1:-1);
   }
 }
 
+// Draggable UI
+(function(){
+  var ui=document.getElementById('ui');
+  var header=document.getElementById('uiHeader');
+  var offsetX=0,offsetY=0,dragging=false;
+  header.addEventListener('mousedown',function(e){
+    dragging=true;
+    offsetX=e.clientX-ui.offsetLeft;
+    offsetY=e.clientY-ui.offsetTop;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',function(e){
+    if(dragging){
+      ui.style.left=(e.clientX-offsetX)+'px';
+      ui.style.top=(e.clientY-offsetY)+'px';
+    }
+  });
+  document.addEventListener('mouseup',function(e){
+    dragging=false;
+  });
+})();
+
 document.getElementById('runBtn').addEventListener('click',function(){
   var code=document.getElementById('codeInput').value;
-  // Scramble before running user code
   scramble();
-  // Wait for scramble to complete, then run user code
   var waitForScramble=setInterval(function(){
     if(!executing){
       clearInterval(waitForScramble);
@@ -377,7 +450,6 @@ function mousePick(event){
       var dot=p.dot(rotationAxes[i].axis);
       if(dot>bestDot){bestDot=dot;bestAxis=i;}
     }
-    // Rotate chosen face clockwise when clicking
     queueRotateLayer(bestAxis,1);
   }
 }
@@ -400,6 +472,25 @@ window.addEventListener('resize',function(){
 });
 
 log("Type commands in the textarea and click Run Code.\nAvailable commands:\nrotateLayerCommand(faceIndex,direction);\ngetCurrentState();\nClick on the puzzle to rotate a selected layer.\nOn run, the puzzle will scramble first before executing your code.");
+
+// Toggle UI
+var ui=document.getElementById('ui');
+var toggleBtn=document.getElementById('toggleUI');
+toggleBtn.addEventListener('click',function(){
+  if(ui.style.display==='none'){
+    ui.style.display='flex';
+    toggleBtn.textContent='Toggle UI';
+  } else {
+    ui.style.display='none';
+    toggleBtn.textContent='Show UI';
+  }
+});
+
+// Close Button
+document.getElementById('closeBtn').addEventListener('click',function(){
+  ui.style.display='none';
+  toggleBtn.textContent='Show UI';
+});
 </script>
 </body>
 </html>
