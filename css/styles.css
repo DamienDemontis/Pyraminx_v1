@@ -15,6 +15,24 @@ body{margin:0;overflow:hidden;font-family:sans-serif;}
 #toggleUI:hover {
   background:#1976d2;
 }
+
+#manualModeBtn {
+  position:absolute;
+  top:20px;
+  left:100px;
+  background:#2196f3;
+  border:none;
+  color:#fff;
+  padding:5px;
+  cursor:pointer;
+  border-radius:3px;
+  font-size:13px;
+  z-index:11;
+}
+#manualModeBtn:hover {
+  background:#1976d2;
+}
+
 #ui {
   position:absolute;
   top:20px;
@@ -124,7 +142,6 @@ body{margin:0;overflow:hidden;font-family:sans-serif;}
 .log-success { color:#a5d6a7; }
 .log-warn { color:#fff176; }
 
-/* Info window */
 #infoWindow, #optionsWindow {
   position:absolute;
   top:50px;
@@ -161,8 +178,6 @@ body{margin:0;overflow:hidden;font-family:sans-serif;}
   padding:10px;
   background:#f9f9f9;
 }
-
-/* Scrollbars for infoWindow and optionsWindow */
 #infoWindow::-webkit-scrollbar, #optionsWindow::-webkit-scrollbar {
   width:6px;
 }

@@ -7,6 +7,7 @@
 </head>
 <body>
 <button id="toggleUI">Toggle UI</button>
+<button id="manualModeBtn">Manual Mode: OFF</button>
 <div id="ui">
   <div id="uiHeader">
     <span style="display:flex;align-items:center;">
@@ -32,24 +33,24 @@
   <div id="infoContent">
     <h3>Available Commands</h3>
     <p><strong>rotateLayerCommand(faceIndex, direction)</strong></p>
-    <p>Rotates a layer of the Pyraminx (with animation). The Pyraminx has 4 main axes, one for each corner, corresponding to <code>faceIndex = 0,1,2,3</code>.</p>
+    <p>Rotates a major axis layer of the Pyraminx. Axes: 0,1,2,3.</p>
     <ul>
-      <li><code>faceIndex</code>: integer (0 to 3), which corner axis to rotate.</li>
-      <li><code>direction</code>: 1 for clockwise, -1 for counter-clockwise.</li>
+      <li><code>faceIndex</code>: 0..3</li>
+      <li><code>direction</code>: 1 clockwise, -1 ccw</li>
     </ul>
     <p>Example: <code>rotateLayerCommand(0,1)</code></p>
     
+    <p><strong>rotateAxisCommand(faceIndex, direction, isTip)</strong></p>
+    <p>Rotates either a major axis or a tip axis.</p>
+    <ul>
+      <li><code>faceIndex</code>: 0..3</li>
+      <li><code>direction</code>: 1 or -1</li>
+      <li><code>isTip</code>: true for tip only, false for entire layer</li>
+    </ul>
+    <p>Example: <code>rotateAxisCommand(0,-1,true)</code> rotates just the tip of axis 0 ccw.</p>
+
     <p><strong>getCurrentState()</strong></p>
-    <p>Returns a structured state of the Pyraminx as an array of 4 face objects. Each face has 9 triangles with a <code>color</code> property.</p>
-    <p>Format:
-    <pre>[
-  {
-    "faceIndex":0,
-    "triangles":[{"color":"yellow"}, ... 9 total ...]
-  },
-  ...
-]</pre>
-    </p>
+    <p>Prints the current state of the Pyraminx (4 faces, each 9 triangles with a "color").</p>
   </div>
 </div>
 
@@ -61,10 +62,10 @@
     </label>
     <p>Changes will be saved automatically.</p>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/three@0.124.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.124.0/examples/js/controls/OrbitControls.js"></script>
-  <script src="js/main.js"></script>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.124.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.124.0/examples/js/controls/OrbitControls.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
